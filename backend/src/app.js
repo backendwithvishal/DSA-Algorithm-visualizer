@@ -49,13 +49,35 @@ app.use(cors({
   origin: (origin, callback) => {
     // Allow requests with no origin (server-to-server, curl, etc.)
     if (!origin) return callback(null, true);
-    if (origin === config.clientUrl) return callback(null, true);
+    
+    // Parse clientUrl as a comma-separated list of allowed origins
+    const allowedOrigins = config.clientUrl
+      ? config.clientUrl.split(',').map(o => o.trim())
+      : [];
+      
+    if (allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
+      return callback(null, true);
+    }
+    
+    // Allow localhost/127.0.0.1 in development environment
+    if (config.env === 'development') {
+      try {
+        const url = new URL(origin);
+        if (url.hostname === 'localhost' || url.hostname === '127.0.0.1') {
+          return callback(null, true);
+        }
+      } catch (err) {
+        // Ignore invalid URL format
+      }
+    }
+    
     callback(new Error(`CORS: Origin '${origin}' is not allowed`));
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'X-Request-ID'],
-  exposedHeaders: ['X-Request-ID']
+  exposedHeaders: ['X-Request-ID'],
+  optionsSuccessStatus: 200
 }));
 
 // ── 4. Request parsing ────────────────────────────────────────────────

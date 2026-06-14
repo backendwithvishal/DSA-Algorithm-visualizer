@@ -116,8 +116,68 @@ export class AuthController {
         await emailQueue.add('verify_email', { type: 'verify', data: { user: { name: user.name, email: user.email }, token: verifyToken } });
       }
 
+      // ── Automatic Login on Successful Registration ─────────────────
+      const device = getDeviceDetails(req);
+      const expiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRY_MS);
+
+      // Create session record
+      const session = await Session.create({
+        userId: user._id,
+        browser: device.browser,
+        os: device.os,
+        deviceType: device.deviceType,
+        ipAddress: device.ipAddress,
+        userAgent: device.userAgent,
+        expiresAt,
+        refreshTokHash: 'initializing'
+      });
+
+      // Generate and store refresh token
+      const refreshToken = await PasetoService.generateRefreshToken({
+        userId: user._id.toString(),
+        sessionId: session._id.toString()
+      });
+      const refreshHash = hashToken(refreshToken);
+
+      session.refreshTokHash = refreshHash;
+      await session.save();
+
+      await RefreshToken.create({ userId: user._id, token: refreshHash, expiresAt });
+
+      // Generate access token
+      const accessToken = await PasetoService.generateAccessToken({
+        userId: user._id.toString(),
+        sessionId: session._id.toString(),
+        role: user.role,
+        plan: user.plan
+      });
+
+      // Log successful login
+      await logSecurityEvent({
+        userId: user._id,
+        email: user.email,
+        eventType: 'login',
+        ipAddress: device.ipAddress,
+        userAgent: device.userAgent
+      });
+
+      // Set cookies
+      res.cookie('refreshToken', refreshToken, makeCookieOptions(REFRESH_TOKEN_EXPIRY_MS));
+      res.cookie('accessToken', accessToken, makeCookieOptions(ACCESS_TOKEN_EXPIRY_MS));
+
       return ApiResponse.success(res, {
-        user: { id: user._id, name: user.name, email: user.email, role: user.role, plan: user.plan }
+        accessToken,
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          avatar: user.avatar,
+          role: user.role,
+          plan: user.plan,
+          emailVerified: user.emailVerified,
+          mfaEnabled: user.mfaEnabled,
+          createdAt: user.createdAt
+        }
       }, 'Registration successful! Please check your email to verify your account.', 201);
     } catch (err) {
       next(err);
