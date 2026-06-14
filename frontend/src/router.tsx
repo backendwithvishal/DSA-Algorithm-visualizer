@@ -25,6 +25,7 @@ const NotFoundPage  = lazy(() => import("./pages/marketing/NotFoundPage").then(m
 const LoginPage          = lazy(() => import("./pages/auth/LoginPage").then(m => ({ default: m.LoginPage })));
 const SignupPage          = lazy(() => import("./pages/auth/SignupPage").then(m => ({ default: m.SignupPage })));
 const ForgotPasswordPage = lazy(() => import("./pages/auth/ForgotPasswordPage").then(m => ({ default: m.ForgotPasswordPage })));
+const ResetPasswordPage  = lazy(() => import("./pages/auth/ResetPasswordPage").then(m => ({ default: m.ResetPasswordPage })));
 
 // ── Onboarding ───────────────────────────────────────────────────────
 const OnboardingPage = lazy(() => import("./pages/onboarding/OnboardingPage").then(m => ({ default: m.OnboardingPage })));
@@ -170,6 +171,9 @@ export function AppRouter(): ReactElement {
         } />
         <Route path="/forgot-password" element={
           <Suspense fallback={<PageLoader />}><ForgotPasswordPage /></Suspense>
+        } />
+        <Route path="/reset-password" element={
+          <Suspense fallback={<PageLoader />}><ResetPasswordPage /></Suspense>
         } />
 
         {/* ── Onboarding ─────────────────────────────────────────── */}

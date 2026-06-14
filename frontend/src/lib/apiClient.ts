@@ -69,7 +69,10 @@ async function request<T>(
   });
 
   // Silent token refresh on 401
-  if (response.status === 401 && retry && endpoint !== '/auth/refresh') {
+  // Skip refresh for all auth endpoints — they are public and a 401 there
+  // means wrong credentials / no cookie, not an expired access token.
+  const isAuthEndpoint = endpoint.startsWith('/auth/');
+  if (response.status === 401 && retry && !isAuthEndpoint) {
     if (!isRefreshing) {
       isRefreshing = true;
       try {
