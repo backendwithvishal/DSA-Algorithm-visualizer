@@ -72,3 +72,18 @@ export const apiAnalysisLimiter = bypassInTest(rateLimit({
     return req.user?._id?.toString() || req.ip || 'unknown';
   }
 }));
+
+/**
+ * Limiter for general AI Chat inquiries.
+ */
+export const chatLimiter = bypassInTest(rateLimit({
+  windowMs: 15 * 60 * 1000,  // 15-minute window
+  max: 30,                    // 30 questions per 15 minutes per IP/User
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: 'You have reached your chat limit. Please wait a few minutes before sending another message.',
+  handler: limitHandler,
+  keyGenerator: (req) => {
+    return req.user?._id?.toString() || req.ip || 'unknown';
+  }
+}));

@@ -6,6 +6,7 @@ import { Footer } from "./components/layout/Footer";
 import { DashboardLayout } from "./components/layout/DashboardLayout";
 import { Skeleton } from "./components/ui/Skeleton";
 import { useAuth } from "./hooks/useAuth";
+import { ChatbotWidget } from "./components/ui/ChatbotWidget";
 
 // ── Marketing pages ──────────────────────────────────────────────────
 const HomePage      = lazy(() => import("./pages/marketing/HomePage").then(m => ({ default: m.HomePage })));
@@ -198,6 +199,7 @@ export function AppRouter(): ReactElement {
         {/* ── 404 ────────────────────────────────────────────────── */}
         <Route path="*" element={<Suspense fallback={<PageLoader />}><NotFoundPage /></Suspense>} />
       </Routes>
+      <ChatbotWidget />
     </BrowserRouter>
   );
 }

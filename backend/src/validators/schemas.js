@@ -87,3 +87,16 @@ export const contactSchema = z.object({
   subject: z.string().min(1, 'Subject is required').max(200, 'Subject is too long').trim(),
   message: z.string().min(10, 'Message must be at least 10 characters').max(5000, 'Message is too long').trim()
 });
+
+// ── Chat Schema ────────────────────────────────────────────────────────
+export const chatSchema = z.object({
+  messages: z
+    .array(
+      z.object({
+        role: z.enum(['system', 'user', 'assistant']),
+        content: z.string().min(1, 'Message content cannot be empty').max(4000, 'Message is too long')
+      })
+    )
+    .min(1, 'Messages cannot be empty'),
+  currentPath: z.string().max(2048).optional()
+});

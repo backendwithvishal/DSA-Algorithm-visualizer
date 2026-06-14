@@ -7,6 +7,7 @@ import notificationRoutes from './notification.routes.js';
 import contactRoutes from './contact.routes.js';
 import fileRoutes from './file.routes.js';
 import auditRoutes from './audit.routes.js';
+import chatRoutes from './chat.routes.js';
 
 const router = Router();
 
@@ -19,5 +20,6 @@ router.use('/notifications', notificationRoutes);
 router.use('/contacts', contactRoutes);
 router.use('/files', fileRoutes);
 router.use('/logs', auditRoutes); // Audit, Activity, Security log management
+router.use('/chat', chatRoutes); // Site-wide AI chatbot assistant
 
 export default router;
