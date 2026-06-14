@@ -396,7 +396,20 @@ export class AuthController {
       res.cookie('refreshToken', newRefreshToken, makeCookieOptions(REFRESH_TOKEN_EXPIRY_MS));
       res.cookie('accessToken', accessToken, makeCookieOptions(ACCESS_TOKEN_EXPIRY_MS));
 
-      return ApiResponse.success(res, { accessToken }, 'Tokens refreshed successfully');
+      return ApiResponse.success(res, {
+        accessToken,
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          avatar: user.avatar,
+          role: user.role,
+          plan: user.plan,
+          emailVerified: user.emailVerified,
+          mfaEnabled: user.mfaEnabled,
+          createdAt: user.createdAt
+        }
+      }, 'Tokens refreshed successfully');
     } catch (err) {
       next(err);
     }
